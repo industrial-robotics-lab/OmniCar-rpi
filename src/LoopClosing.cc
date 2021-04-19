@@ -31,6 +31,8 @@
 #include<mutex>
 #include<thread>
 
+#include <unistd.h> // fixes "usleep" error
+
 
 namespace ORB_SLAM2
 {

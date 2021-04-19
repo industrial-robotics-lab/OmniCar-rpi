@@ -6,20 +6,20 @@ using namespace std;
 bool load_as_text(ORB_SLAM2::ORBVocabulary* voc, const std::string infile) {
   clock_t tStart = clock();
   bool res = voc->loadFromTextFile(infile);
-  printf("Loading fom text: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
+  printf("Loading from text: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
   return res;
 }
 
 void load_as_xml(ORB_SLAM2::ORBVocabulary* voc, const std::string infile) {
   clock_t tStart = clock();
   voc->load(infile);
-  printf("Loading fom xml: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
+  printf("Loading from xml: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
 }
 
 void load_as_binary(ORB_SLAM2::ORBVocabulary* voc, const std::string infile) {
   clock_t tStart = clock();
   voc->loadFromBinaryFile(infile);
-  printf("Loading fom binary: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
+  printf("Loading from binary: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
 }
 
 void save_as_xml(ORB_SLAM2::ORBVocabulary* voc, const std::string outfile) {

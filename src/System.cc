@@ -27,6 +27,8 @@
 #include <iomanip>
 #include <time.h>
 
+#include <unistd.h> // fixes "usleep" error
+
 bool has_suffix(const std::string &str, const std::string &suffix) {
   std::size_t index = str.find(suffix, str.size() - suffix.size());
   return (index != std::string::npos);

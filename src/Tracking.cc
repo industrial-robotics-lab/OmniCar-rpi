@@ -37,6 +37,7 @@
 
 #include<mutex>
 
+#include <unistd.h> // fixes "usleep" error
 
 using namespace std;
 
