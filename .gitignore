@@ -1,5 +1,4 @@
-CMakeCache.txt
-
+.vscode/
 build/
 exe/
 lib/

@@ -1,24 +1,4 @@
-/**
-* This file is part of ORB-SLAM2.
-*
-* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
-* For more information see <https://github.com/raulmur/ORB_SLAM2>
-*
-* ORB-SLAM2 is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ORB-SLAM2 is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
-*/
-
-#include "Viewer.h"
+#include "OmniCarTransceiver.h"
 #include <pangolin/pangolin.h>
 
 #include <mutex>
@@ -28,7 +8,7 @@
 namespace ORB_SLAM2
 {
 
-Viewer::Viewer(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Tracking *pTracking, const string &strSettingPath):
+OmniCarTransceiver::OmniCarTransceiver(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Tracking *pTracking, const string &strSettingPath):
     mpSystem(pSystem), mpFrameDrawer(pFrameDrawer),mpMapDrawer(pMapDrawer), mpTracker(pTracking),
     mbFinishRequested(false), mbFinished(true), mbStopped(true), mbStopRequested(false)
 {
@@ -53,7 +33,7 @@ Viewer::Viewer(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer
     mViewpointF = fSettings["Viewer.ViewpointF"];
 }
 
-void Viewer::Run()
+void OmniCarTransceiver::Run()
 {
     mbFinished = false;
     mbStopped = false;
@@ -170,44 +150,44 @@ void Viewer::Run()
     SetFinish();
 }
 
-void Viewer::RequestFinish()
+void OmniCarTransceiver::RequestFinish()
 {
     unique_lock<mutex> lock(mMutexFinish);
     mbFinishRequested = true;
 }
 
-bool Viewer::CheckFinish()
+bool OmniCarTransceiver::CheckFinish()
 {
     unique_lock<mutex> lock(mMutexFinish);
     return mbFinishRequested;
 }
 
-void Viewer::SetFinish()
+void OmniCarTransceiver::SetFinish()
 {
     unique_lock<mutex> lock(mMutexFinish);
     mbFinished = true;
 }
 
-bool Viewer::isFinished()
+bool OmniCarTransceiver::isFinished()
 {
     unique_lock<mutex> lock(mMutexFinish);
     return mbFinished;
 }
 
-void Viewer::RequestStop()
+void OmniCarTransceiver::RequestStop()
 {
     unique_lock<mutex> lock(mMutexStop);
     if(!mbStopped)
         mbStopRequested = true;
 }
 
-bool Viewer::isStopped()
+bool OmniCarTransceiver::isStopped()
 {
     unique_lock<mutex> lock(mMutexStop);
     return mbStopped;
 }
 
-bool Viewer::Stop()
+bool OmniCarTransceiver::Stop()
 {
     unique_lock<mutex> lock(mMutexStop);
     unique_lock<mutex> lock2(mMutexFinish);
@@ -225,7 +205,7 @@ bool Viewer::Stop()
 
 }
 
-void Viewer::Release()
+void OmniCarTransceiver::Release()
 {
     unique_lock<mutex> lock(mMutexStop);
     mbStopped = false;

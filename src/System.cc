@@ -108,12 +108,14 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR);
     mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
 
-    //Initialize the Viewer thread and launch
+    //Initialize the Viewer thread and launch or start OmniCar communication
     if(bUseViewer)
     {
         mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile);
         mptViewer = new thread(&Viewer::Run, mpViewer);
         mpTracker->SetViewer(mpViewer);
+    } else {
+        mpOmniCarTransceiver = new OmniCarTransceiver(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile);
     }
 
     //Set pointers between threads
