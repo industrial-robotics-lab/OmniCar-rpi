@@ -38,8 +38,8 @@ namespace ORB_SLAM2
 {
 
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
-               const bool bUseViewer):mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mbReset(false),mbActivateLocalizationMode(false),
-        mbDeactivateLocalizationMode(false)
+               const bool bUseViewer):mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mpOmniCarTransceiver(static_cast<OmniCarTransceiver*>(NULL)),
+               mbReset(false),mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false)
 {
     // Output welcome message
     cout << endl <<
@@ -111,11 +111,13 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     //Initialize the Viewer thread and launch or start OmniCar communication
     if(bUseViewer)
     {
-        mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile);
+        mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpTracker, strSettingsFile);
         mptViewer = new thread(&Viewer::Run, mpViewer);
         mpTracker->SetViewer(mpViewer);
     } else {
-        mpOmniCarTransceiver = new OmniCarTransceiver(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile);
+        mpOmniCarTransceiver = new OmniCarTransceiver(this, mpFrameDrawer, strSettingsFile);
+        mptOmniCarTransceiver = new thread(&OmniCarTransceiver::Run, mpOmniCarTransceiver);
+        mpTracker->SetOmniCarTransceiver(mpOmniCarTransceiver);
     }
 
     //Set pointers between threads
@@ -322,6 +324,10 @@ void System::Shutdown()
     {
         mpViewer->RequestFinish();
         while(!mpViewer->isFinished())
+            usleep(5000);
+    } else {
+        mpOmniCarTransceiver->RequestFinish();
+        while(!mpOmniCarTransceiver->isFinished())
             usleep(5000);
     }
 

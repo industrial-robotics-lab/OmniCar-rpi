@@ -164,6 +164,11 @@ void Tracking::SetViewer(Viewer *pViewer)
     mpViewer=pViewer;
 }
 
+void Tracking::SetOmniCarTransceiver(OmniCarTransceiver *pOmniCarTransceiver)
+{
+    mpOmniCarTransceiver=pOmniCarTransceiver;
+}
+
 
 cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp)
 {

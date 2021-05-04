@@ -164,6 +164,7 @@ private:
     std::thread* mptLocalMapping;
     std::thread* mptLoopClosing;
     std::thread* mptViewer;
+    std::thread* mptOmniCarTransceiver;
 
     // Reset flag
     std::mutex mMutexReset;

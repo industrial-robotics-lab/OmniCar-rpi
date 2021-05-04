@@ -7,7 +7,7 @@ using namespace std;
 
 int main() {
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM("../Vocabulary/ORBvoc.bin", "../WebCam.yaml", ORB_SLAM2::System::MONOCULAR, true);
+    ORB_SLAM2::System SLAM("../Vocabulary/ORBvoc.bin", "../WebCam.yaml", ORB_SLAM2::System::MONOCULAR, false);
 
     // Capture frames from webcam
     cv::Mat frame;
