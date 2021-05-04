@@ -180,22 +180,33 @@ void OmniCarTransceiver::udp_tx()
         if (img.empty()) break;
         
         vector<uchar> imgBuffer;
-        imencode(".jpg", img, imgBuffer);
+        std::vector<int> param(2);
+        param[0] = cv::IMWRITE_JPEG_QUALITY;
+        param[1] = 50;//default(95) 0-100
+        imencode(".jpg", img, imgBuffer, param);
         int imgBufferSize = imgBuffer.size();
-        sendto(serverSocket, &imgBufferSize, sizeof(imgBufferSize), 0, (sockaddr *)&clientAddress, clientSize);
-        // cout << "Encoded image size: " << imgBufferSize << endl;
-        for (auto it = imgBuffer.begin(); it < imgBuffer.end(); it += BUFFER_SIZE)
+        // sendto(serverSocket, &imgBufferSize, sizeof(imgBufferSize), 0, (sockaddr *)&clientAddress, clientSize);
+        cout << "Encoded image size: " << imgBufferSize << "; dt = " << mT << endl;
+
+        int bytesSent = sendto(serverSocket, &imgBuffer[0], imgBufferSize, 0, (sockaddr *)&clientAddress, clientSize);
+        if (bytesSent == -1)
         {
-            auto end = it + BUFFER_SIZE;
-            if (end >= imgBuffer.end()) end = imgBuffer.end();
-            copy(it, end, buffer);
-            int bytesSent = sendto(serverSocket, buffer, BUFFER_SIZE, 0, (sockaddr *)&clientAddress, clientSize);
-            if (bytesSent == -1)
-            {
-                cout << "Error sending image chunk" << endl;
-            }
+            cout << "Error sending image" << endl;
         }
+        // for (auto it = imgBuffer.begin(); it < imgBuffer.end(); it += BUFFER_SIZE)
+        // {
+        //     auto end = it + BUFFER_SIZE;
+        //     if (end >= imgBuffer.end()) end = imgBuffer.end();
+        //     copy(it, end, buffer);
+        //     int bytesSent = sendto(serverSocket, buffer, BUFFER_SIZE, 0, (sockaddr *)&clientAddress, clientSize);
+        //     if (bytesSent == -1)
+        //     {
+        //         cout << "Error sending image chunk" << endl;
+        //     }
+        // }
+        // cout << "Image size: " << img.size() << " -> ";
         imshow("TRANSMITTING", img);
+        // cout << img.size() << endl;
         if (cv::waitKey(mT) >= 0)
             break;
     }

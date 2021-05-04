@@ -20,7 +20,7 @@
 #define SERVER_IP "127.0.0.1"
 #define TCP_SERVER_PORT 10001
 #define UDP_SERVER_PORT 10002
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 65536
 #define TIMEOUT 10
 
 namespace ORB_SLAM2
