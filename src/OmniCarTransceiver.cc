@@ -43,6 +43,7 @@ void OmniCarTransceiver::Run()
 
     thread tcp_thread(&OmniCarTransceiver::tcp_rx, this);
     thread udp_thread(&OmniCarTransceiver::udp_tx, this);
+    thread serial_thread(&OmniCarTransceiver::serial_talk, this);
     cout << "TCP and UDP threads were started" << endl;
 
     while(1)
@@ -81,7 +82,8 @@ void OmniCarTransceiver::Run()
 
     SetFinish();
     tcp_thread.join();
-    tcp_thread.join();
+    udp_thread.join();
+    serial_thread.join();
 }
 
 void OmniCarTransceiver::RequestFinish()
@@ -153,61 +155,49 @@ void OmniCarTransceiver::udp_tx()
     {
         cerr << "Error: Can't create a socket" << endl;
     }
- 
+
     // Bind the ip address and port to a socket
     sockaddr_in serverAddress;
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(UDP_SERVER_PORT);
     inet_pton(AF_INET, SERVER_IP, &serverAddress.sin_addr);
- 
-    bind(serverSocket, (sockaddr*)&serverAddress, sizeof(serverAddress));
- 
+
+    bind(serverSocket, (sockaddr *)&serverAddress, sizeof(serverAddress));
+
     // Get init message from client
     char buffer[BUFFER_SIZE];
     memset(buffer, 0, BUFFER_SIZE);
     sockaddr_in clientAddress;
     socklen_t clientSize = sizeof(clientAddress);
-    int bytesReceived = recvfrom(serverSocket, buffer, BUFFER_SIZE, 0, (sockaddr*)&clientAddress, &clientSize);
+    int bytesReceived = recvfrom(serverSocket, buffer, BUFFER_SIZE, 0, (sockaddr *)&clientAddress, &clientSize);
     if (bytesReceived == -1)
     {
         cerr << "Error in recvfrom()" << endl;
     }
     cout << "Received init message -> starting video transmission" << endl;
 
+    cv::Mat img;
     while (true)
     {
-        cv::Mat img = mpFrameDrawer->DrawFrame();
-        if (img.empty()) break;
-        
+        img = mpFrameDrawer->DrawFrame();
+        if (img.empty())
+            break;
+
         vector<uchar> imgBuffer;
         std::vector<int> param(2);
         param[0] = cv::IMWRITE_JPEG_QUALITY;
-        param[1] = 50;//default(95) 0-100
+        param[1] = 50; //default(95) 0-100
         imencode(".jpg", img, imgBuffer, param);
         int imgBufferSize = imgBuffer.size();
-        // sendto(serverSocket, &imgBufferSize, sizeof(imgBufferSize), 0, (sockaddr *)&clientAddress, clientSize);
-        cout << "Encoded image size: " << imgBufferSize << "; dt = " << mT << endl;
+        cout << "Encoded image size: " << imgBufferSize << endl;
 
         int bytesSent = sendto(serverSocket, &imgBuffer[0], imgBufferSize, 0, (sockaddr *)&clientAddress, clientSize);
         if (bytesSent == -1)
         {
             cout << "Error sending image" << endl;
         }
-        // for (auto it = imgBuffer.begin(); it < imgBuffer.end(); it += BUFFER_SIZE)
-        // {
-        //     auto end = it + BUFFER_SIZE;
-        //     if (end >= imgBuffer.end()) end = imgBuffer.end();
-        //     copy(it, end, buffer);
-        //     int bytesSent = sendto(serverSocket, buffer, BUFFER_SIZE, 0, (sockaddr *)&clientAddress, clientSize);
-        //     if (bytesSent == -1)
-        //     {
-        //         cout << "Error sending image chunk" << endl;
-        //     }
-        // }
-        // cout << "Image size: " << img.size() << " -> ";
-        imshow("TRANSMITTING", img);
-        // cout << img.size() << endl;
-        if (cv::waitKey(mT) >= 0)
+        // imshow("TRANSMITTING", img);
+        if (cv::waitKey(TIMEOUT) >= 0)
             break;
     }
  
@@ -277,15 +267,71 @@ void OmniCarTransceiver::tcp_rx()
             cout << "Client disconnected " << endl;
             break;
         }
+        // cout << "Received " << bytesReceived << "bytes" << endl;
 
-        cout << string(buffer, 0, bytesReceived) << endl;
-
-        // Echo message back to client
-        send(clientSocket, buffer, bytesReceived + 1, 0);
+        if (bytesReceived == 3)
+        {
+            unique_lock<mutex> lock(mutexControl);
+            memcpy(controlVec, buffer, 3);
+            // printf("Got [%i, %i, %i] from TCP\n", controlVec[0], controlVec[1], controlVec[2]);
+        }
     }
 
     // Close client socket
     close(clientSocket);
+    unique_lock<mutex> lock(mutexControl);
+    controlVec[0] = 127;
+    controlVec[1] = 127;
+    controlVec[2] = 127;
 }
 
+void OmniCarTransceiver::serial_talk()
+{
+    const char *portName = "/dev/ttyACM0";
+    float feedbackPos[3] = {0, 0, 0};
+    char n = '\n';
+    int bytesSent = 0;
+    int bytesRead = 0;
+
+    const int bufferSize = 14;
+    char buffer[bufferSize] = {0};
+    uint8_t readChecksum;
+    uint8_t calcChecksum;
+
+    int fd = openPort(portName);
+    configPort(fd);
+    srand(static_cast<unsigned>(time(0)));
+
+    while (1)
+    {
+        //tx
+        {
+            unique_lock<mutex> lock(mutexControl);
+            calcChecksum = crc8((uint8_t *)controlVec, 3);
+            bytesSent = 0;
+            bytesSent += write(fd, controlVec, 3);
+            bytesSent += write(fd, &calcChecksum, 1);
+            bytesSent += write(fd, &n, 1);
+            // printf("Just sent %i bytes to Arduino\n", bytesSent);
+        }
+
+        //rx
+        for (int i = 0; i < 14; i++)
+        {
+            bytesRead = read(fd, buffer + i, 1);
+        }
+
+        if (buffer[13] == '\n')
+        {
+            readChecksum = buffer[0];
+            memcpy(feedbackPos, buffer + 1, 12);
+            calcChecksum = crc8((uint8_t *)feedbackPos, 12);
+            bool isPassed = readChecksum == calcChecksum;
+            if (isPassed)
+            {
+                // printf("Received accurate: [%f; %f, %f];\n\n", feedbackPos[0], feedbackPos[1], feedbackPos[2]);
+            }
+        }
+    }
+}
 }

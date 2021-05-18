@@ -10,6 +10,7 @@ int main() {
     ORB_SLAM2::System SLAM("../Vocabulary/ORBvoc.bin", "../WebCam.yaml", ORB_SLAM2::System::MONOCULAR, false);
 
     // Capture frames from webcam
+    cv::Mat frameFlipped;
     cv::Mat frame;
     cv::VideoCapture cap;
     cap.open(0, cv::CAP_ANY);
@@ -23,12 +24,13 @@ int main() {
     chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
     while (1)
     {
-        cap.read(frame);
-        if (frame.empty())
+        cap.read(frameFlipped);
+        if (frameFlipped.empty())
         {
             std::cerr << "ERROR! blank frame grabbed\n";
             break;
         }
+        cv::flip(frameFlipped, frame, -1);
 
         t2 = chrono::steady_clock::now();
         double interval = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();

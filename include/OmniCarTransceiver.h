@@ -14,13 +14,14 @@
 #include "MapDrawer.h"
 #include "Tracking.h"
 #include "System.h"
+#include "serial_utils.h"
 
 #include <mutex>
 
 #define SERVER_IP "127.0.0.1"
 #define TCP_SERVER_PORT 10001
 #define UDP_SERVER_PORT 10002
-#define BUFFER_SIZE 65536
+#define BUFFER_SIZE 1024
 #define TIMEOUT 10
 
 namespace ORB_SLAM2
@@ -73,6 +74,9 @@ private:
 
     void udp_tx();
     void tcp_rx();
+    void serial_talk();
+    std::mutex mutexControl;
+    uint8_t controlVec[3] = {127, 127, 127}; // means zero velocity
 };
 
 }

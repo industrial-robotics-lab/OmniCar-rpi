@@ -83,9 +83,9 @@ ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/exe)
 
-add_executable(my_exe 
+add_executable(omnicar 
 src/main.cpp)
-target_link_libraries(my_exe ${PROJECT_NAME})
+target_link_libraries(omnicar ${PROJECT_NAME})
 
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/RGB-D)
 
