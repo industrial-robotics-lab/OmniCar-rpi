@@ -38,7 +38,7 @@ namespace ORB_SLAM2
 {
 
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
-               const bool bUseViewer):mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mpOmniCarTransceiver(static_cast<OmniCarTransceiver*>(NULL)),
+               const bool bUseViewer):mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mpTransceiver(static_cast<Transceiver*>(NULL)),
                mbReset(false),mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false)
 {
     // Output welcome message
@@ -115,9 +115,9 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
         mptViewer = new thread(&Viewer::Run, mpViewer);
         mpTracker->SetViewer(mpViewer);
     } else {
-        mpOmniCarTransceiver = new OmniCarTransceiver(this, mpFrameDrawer, strSettingsFile);
-        mptOmniCarTransceiver = new thread(&OmniCarTransceiver::Run, mpOmniCarTransceiver);
-        mpTracker->SetOmniCarTransceiver(mpOmniCarTransceiver);
+        mpTransceiver = new Transceiver(this, mpFrameDrawer, strSettingsFile);
+        mptTransceiver = new thread(&Transceiver::Run, mpTransceiver);
+        mpTracker->SetTransceiver(mpTransceiver);
     }
 
     //Set pointers between threads
@@ -326,8 +326,8 @@ void System::Shutdown()
         while(!mpViewer->isFinished())
             usleep(5000);
     } else {
-        mpOmniCarTransceiver->RequestFinish();
-        while(!mpOmniCarTransceiver->isFinished())
+        mpTransceiver->RequestFinish();
+        while(!mpTransceiver->isFinished())
             usleep(5000);
     }
 

@@ -35,13 +35,13 @@
 #include "KeyFrameDatabase.h"
 #include "ORBVocabulary.h"
 #include "Viewer.h"
-#include "OmniCarTransceiver.h"
+#include "Transceiver.h"
 
 namespace ORB_SLAM2
 {
 
 class Viewer;
-class OmniCarTransceiver;
+class Transceiver;
 class FrameDrawer;
 class Map;
 class Tracking;
@@ -153,8 +153,8 @@ private:
     // The viewer draws the map and the current camera pose. It uses Pangolin.
     Viewer* mpViewer;
 
-    // OmniCar transceiver communicates in three threads via TCP, UDP and UART
-    OmniCarTransceiver* mpOmniCarTransceiver;
+    // OmniCar transceiver communicates in 4 threads via TCP, UDP and UART
+    Transceiver* mpTransceiver;
 
     FrameDrawer* mpFrameDrawer;
     MapDrawer* mpMapDrawer;
@@ -164,7 +164,7 @@ private:
     std::thread* mptLocalMapping;
     std::thread* mptLoopClosing;
     std::thread* mptViewer;
-    std::thread* mptOmniCarTransceiver;
+    std::thread* mptTransceiver;
 
     // Reset flag
     std::mutex mMutexReset;

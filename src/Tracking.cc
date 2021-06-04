@@ -164,9 +164,9 @@ void Tracking::SetViewer(Viewer *pViewer)
     mpViewer=pViewer;
 }
 
-void Tracking::SetOmniCarTransceiver(OmniCarTransceiver *pOmniCarTransceiver)
+void Tracking::SetTransceiver(Transceiver *pTransceiver)
 {
-    mpOmniCarTransceiver=pOmniCarTransceiver;
+    mpTransceiver=pTransceiver;
 }
 
 
