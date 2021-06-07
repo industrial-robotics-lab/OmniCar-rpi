@@ -11,8 +11,8 @@ namespace ORB_SLAM2
                                                                                                          mbFinishRequested(false), mbFinished(true), mbStopped(true), mbStopRequested(false)
     {
         portName = "/dev/ttyACM0";
-        // ip = "192.168.0.119";
-        ip = "127.0.0.1";
+        ip = "192.168.0.119";
+        // ip = "127.0.0.1";
         portTcpRx = 10001;
         portUdpTx = 10002;
         portTcpTx = 10003;
@@ -205,7 +205,7 @@ namespace ORB_SLAM2
             vector<uchar> imgBuffer;
             std::vector<int> param(2);
             param[0] = cv::IMWRITE_JPEG_QUALITY;
-            param[1] = 10; //default(95) 0-100
+            param[1] = 80; //default(95) 0-100
             imencode(".jpg", img, imgBuffer, param);
             int imgBufferSize = imgBuffer.size();
             // cout << "Encoded image size: " << imgBufferSize << endl;
