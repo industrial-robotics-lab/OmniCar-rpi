@@ -28,7 +28,7 @@ using namespace std;
 using namespace cv;
 
 #define BAUDRATE B38400
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 64
 #define TIMEOUT 10
 
 namespace ORB_SLAM2
